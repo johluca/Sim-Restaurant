@@ -4,7 +4,7 @@
   + Name: John Lucas
   + USC Email: johnluca@usc.edu
   + USC ID: 5194054637
-  + Student Site: [johnrocklucas.com] (www.johnrocklucas.com)
+
 
 ###Run Instructions
   1. clone this repository onto local machine
