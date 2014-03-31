@@ -4,6 +4,7 @@
   + Name: John Lucas
   + USC Email: johnluca@usc.edu
   + USC ID: 5194054637
+  + Student Site: [johnrocklucas.com] (www.johnrocklucas.com)
 
 ###Run Instructions
   1. clone this repository onto local machine
@@ -19,7 +20,7 @@
   
 ###Notes
   1. Only 8 customers can be stored in the customer waiting area without stacking
-  2. I have implemented both opportunities for extra credit: Refrigerator and, if Cashier can't afford to pay Market, Cashier will give everything he has
+  2. I have implemented: Refrigerator and, if Cashier can't afford to pay Market, Cashier will give everything he has
 
 ###Cashier Tests Implemented
   1. Cashier initializes correctly
