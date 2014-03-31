@@ -1,0 +1,179 @@
+***********V2.1 DESIGN DOC ADDITION***********
+
+CASHIER DESIGN
+
+DATA
+name
+Map<String food, int price> priceMenu
+List<MyCustomers> myCustomers
+MyCustomer class (with customer and state and choice and payment)
+CustomerState enum {doneEating, Billed, Payed}
+
+MESSAGES
+computeBill(customer c, string choice, waiter w) { //from waiter
+	myCustomers.add(c, choice, w, doneEating);
+}
+
+heresMyPayment(double cash, customer c) { //from customer
+	MyCustomer m = findCustomer(c);
+
+	m.payment = cash;
+	m.state = paying;
+}
+
+
+
+SCHED
+if there is mycustomer m such that m is doneEating {
+	calculateBill(m);
+	
+}
+if there is mycustomer m such that m is paying {
+	calculateChange(m)
+	
+}
+
+
+ACTION
+calculateBill(MyCustomer m) {
+	double price = priceMenu.get(m.choice);
+	m.w.msgHereIsCheck(m.c, price);
+
+}
+calculateChange(MyCustomer m) {
+	double price = priceMenu.get(m.choice);
+	double change = m.payment - price;
+	//should check if positive for non norms
+	m.c.msgChange(change);
+	m.state = leaving;
+}
+
+---------------------------------------------------------------------------
+
+CUSTOMER
+
+DATA
+add double money (constructed randomly)
+add states [watingForBill, Paying}
+add events {receivedBill, receivedChange}
+add double myBill
+add Cashier (from waiter)
+
+
+MESSAGES
+msgHereIsCheck(double check, Cashier) {
+	event = receivedBill
+	this.cashier = cashier
+	bill = check
+}
+msgHereIsChange(double change) {
+	myMoney += change
+	event = receivedChange
+}
+
+SCHED
+if state = eating and event = doneEating {
+	readyToPay()
+	state = waitingForBill
+}
+if state = waitingForBill and event = billArrived {
+	pay()
+	state = paying
+}
+if state = paying and event = receivedChange {
+	leaveTable()
+	state = leaving
+}
+
+
+ACTIONS
+readyToPay() {
+	mywaiter.msgreadytopay(this)//make waiter go to cashier
+}
+pay() {
+	cashier.msgHereIsPayment(this, Math.ceil(myBill))
+	money = this.money-math.ceil(myBill) 
+}
+
+-----------------------------------------------------------------------------
+
+
+WAITER 
+
+DATA
+Cashier c
+states doneEating, paying
+add bill to mycustomer class
+
+MESSAGES
+msgDoneEating(customer) {
+	customer.state = doneEating
+	statechanged()
+}
+msgHereIsCheck(customer, double check) {
+	c.check = check;
+	release semaphore (active)
+	//no state changed
+	
+}
+
+
+SCHED
+if there is a customer that is doneEating {
+	getCheck(MyCustomer);
+	state = paying;
+}
+
+
+ACTIONS
+getCheck(MyCustomer) {
+	dogotocashier()
+	acquire
+	cashier.msgcomputebill(mc.c, mc.choice, this)
+	acquire
+	dogototable(c.tablenum)
+	acquire
+	c.c.msgHereIsYourCheck(c.bill, cashier)
+}
+
+-----------------------------------------------------------------------------
+
+
+MARKET DESIGN
+
+DATA
+Map<String food, int quantity>
+List Foods
+List Amounts
+CookAgent cook
+bool orderrequested
+Timer deliverTimer
+
+
+MESSAGES
+msgLowOnFood(List foods, List amounts, Cook) {
+	this.cook = cook
+	requestedFoods = foods
+	requestedamounts = amounts
+	orderrequested = true
+}
+
+
+
+SCHED
+if(orderrequested) {
+	processOrder();
+	orderRequested = false;
+}
+
+ACTION
+processOrder() {
+	create 2 lists, one of strings, and one of ints: donthavefoods and donthaveamounts
+	for all foods in market
+		check if market has enough, if so add to foods and amounts, respectively
+		ELSE
+		if market does NOT have enough, add to donthavefoods and donthaveamounts
+		cook.msgIDontHave(donthavefoods, donthaveamounts)
+		start delivertimer, and when it ends
+			cook.msgfooddelivered(foods, amounts)
+}
